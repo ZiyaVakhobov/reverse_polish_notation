@@ -2,8 +2,10 @@
 
 namespace app\controllers;
 
+use app\components\services\LoggerService;
 use app\models\Calculator;
 use Yii;
+use yii\base\Module;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
@@ -13,6 +15,14 @@ use app\models\ContactForm;
 
 class SiteController extends Controller
 {
+
+    private $service;
+    public function __construct($id, Module $module, array $config = [])
+    {
+        $this->service = new LoggerService();
+        parent::__construct($id, $module, $config);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -65,8 +75,12 @@ class SiteController extends Controller
     {
         $model =new Calculator();
         if ($model->load(Yii::$app->request->post())&& $model->calc()) {
-            Yii::info('asd');
+            $this->service->addLog($model);
         }
-        return $this->render('index', ['model'=>$model]);
+
+        return $this->render('index', [
+            'model'=>$model,
+            'logs' => $this->service->list()
+        ]);
     }
 }
