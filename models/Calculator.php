@@ -21,17 +21,19 @@ class Calculator extends Model
         return  [
             ['expression','match','pattern' => '(([0-9])\d+|\+|\-|\*|\/|\ )'],
             ['expression','required'],
+            ['expression','checkArguments'],
+            ['expression','checkOperations'],
         ];
     }
 
-    protected function checkArguments($attribute,$params)
+    public function checkArguments($attribute,$params)
     {
-        if (strlen($this->$attribute)<3) {
+        if (count(explode(' ',$this->$attribute))<3) {
             $this->addError($attribute, "not enough arguments");
         }
     }
 
-    protected function checkOperations($attribute,$params)
+    public function checkOperations($attribute,$params)
     {
         $numbers = 0;
         $operations = 0;
@@ -44,6 +46,10 @@ class Calculator extends Model
               $this->addError($attribute, "$attribute should have only numbers and '+','-','*','/' operations. Others are not permited");
             }
         }
+        if ($numbers != ($operations + 1)) {
+            $this->addError($attribute, "wrong expression. Please add more '+','-','*','/' operations");
+        }
+
     }
     public function calc()
     {
